@@ -18,9 +18,11 @@ class Server {
             Socket connectionSocket = welcomeSocket.accept();
             BufferedReader inFromClient =
                     new BufferedReader(new InputStreamReader(connectionSocket.getInputStream()));
-            DataOutputStream outToClient = new DataOutputStream(connectionSocket.getOutputStream());
+            BufferedWriter outToClient =
+                    new BufferedWriter(new OutputStreamWriter(connectionSocket.getOutputStream()));
 
-            outToClient.writeBytes("+" + serverName + " SFTP Service\n");
+            outToClient.write("+" + serverName + " SFTP Service\0");
+            outToClient.flush();
 
             Accounts acc = new Accounts();
             acc.loadAccounts();
@@ -128,8 +130,9 @@ class Server {
                     active = false;
                 }
 
-                responseMessage = responseMessage + "\n";
-                outToClient.writeBytes(responseMessage);
+                responseMessage = responseMessage + "\0";
+                outToClient.write(responseMessage);
+                outToClient.flush();
             }
         }
     }

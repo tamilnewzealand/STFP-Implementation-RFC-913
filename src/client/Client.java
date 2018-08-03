@@ -5,32 +5,43 @@ import java.net.*;
 
 class Client {
 
-    private static DataOutputStream outToServer;
-    private static BufferedReader inFromServer;
+    public static void processResponse(BufferedReader in) throws Exception{
+        StringBuilder builder = new StringBuilder();
+        char character = (char)in.read();
 
-    public static String sendReceive(String message) throws Exception {
-        message = message + "\n";
-        outToServer.writeBytes(message);
-        return inFromServer.readLine();
+        while (character != '\0') {
+            builder.append(character);
+            character = (char)in.read();
+    }
+
+        System.out.printf(builder.toString() + "%n");
     }
 
     public static void main(String argv[]) throws Exception {
         // establish connection to server
         Socket clientSocket = new Socket("localhost", 6789);
-        outToServer = new DataOutputStream(clientSocket.getOutputStream());
-        inFromServer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-        System.out.println(inFromServer.readLine());
+        BufferedWriter outToServer =
+                new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream()));
+        BufferedReader inFromServer =
+                new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+        processResponse(inFromServer);
 
-        String sentence;
-        String modifiedSentence;
+        String outgoingMessage;
         boolean active = true;
         BufferedReader inFromUser = new BufferedReader(new InputStreamReader(System.in));
 
         while(active) {
-            sentence = inFromUser.readLine();
-            if (sentence.substring(0,4).equals("DONE")) active = false;
-            modifiedSentence = sendReceive(sentence);
-            System.out.println(modifiedSentence);
+            outgoingMessage = inFromUser.readLine();
+            try {
+                if (outgoingMessage.substring(0,4).equals("DONE")) active = false;
+            } catch (IndexOutOfBoundsException e) {
+                active = true;
+            }
+            outgoingMessage = outgoingMessage + "\0";
+            outToServer.write(outgoingMessage);
+            outToServer.flush();
+
+            processResponse(inFromServer);
         }
 
         // disconnect from server
