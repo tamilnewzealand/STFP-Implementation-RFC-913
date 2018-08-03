@@ -25,6 +25,7 @@ class Server {
             Accounts acc = new Accounts();
             acc.loadAccounts();
             int failedAttempts = 0;
+            String transferType = "B";
 
             while (active) {
                 clientMessage = inFromClient.readLine();
@@ -72,7 +73,28 @@ class Server {
                         }
                         break;
                     case "TYPE":
-                        responseMessage = "-";
+                        if (acc.isLoggedIn()) {
+                            switch (clientMessage) {
+                                case "A":
+                                    responseMessage = "+Using Ascii mode";
+                                    transferType = "A";
+                                    break;
+                                case "B":
+                                    responseMessage = "+Using Binary mode";
+                                    transferType = "B";
+                                    break;
+                                case "C":
+                                    responseMessage = "+Using Continuous mode";
+                                    transferType = "C";
+                                    break;
+                                default:
+                                    responseMessage = "-Type not valid";
+                                    break;
+                            }
+                        } else {
+                            responseMessage = "-Not logged in, please log in";
+                            failedAttempts++;
+                        }
                         break;
                     case "LIST":
                         responseMessage = "-";
