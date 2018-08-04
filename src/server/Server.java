@@ -29,12 +29,14 @@ class Server {
 
             Accounts acc = new Accounts();
             acc.loadAccounts();
+            active = true;
             int failedAttempts = 0;
             String transferType = "B";
             String currentDir = "/";
 
             while (active) {
                 clientMessage = inFromClient.readLine();
+                try {
                 clientCommand = clientMessage.substring(0, 4);
                 try {
                     clientMessage = clientMessage.substring(5);
@@ -154,11 +156,16 @@ class Server {
                     responseMessage = "-Too many failed attempts, closing connection";
                     active = false;
                 }
+                } catch (Exception e) {
+                    responseMessage = "-Unknown Server Error";
+                }
 
                 responseMessage = responseMessage + "\0";
                 outToClient.write(responseMessage);
                 outToClient.flush();
             }
+
+            connectionSocket.close();
         }
     }
 }
