@@ -9,6 +9,18 @@ import server.*;
 
 class Server {
 
+    public static String getResponse(BufferedReader in) throws Exception{
+        StringBuilder builder = new StringBuilder();
+        char character = (char)in.read();
+
+        while (character != '\0') {
+            builder.append(character);
+            character = (char)in.read();
+        }
+
+        return builder.toString();
+    }
+
     public static void main(String argv[]) throws Exception {
         String clientMessage;
         String responseMessage;
@@ -35,7 +47,7 @@ class Server {
             String currentDir = "/";
 
             while (active) {
-                clientMessage = inFromClient.readLine();
+                clientMessage = getResponse(inFromClient);
                 try {
                 clientCommand = clientMessage.substring(0, 4);
                 try {
