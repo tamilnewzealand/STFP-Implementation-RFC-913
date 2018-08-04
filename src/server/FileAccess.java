@@ -40,4 +40,9 @@ public class FileAccess {
         File folder = new File(dir);
         return folder.exists();
     }
+
+    public static boolean deleteFile(String name) {
+        File file = new File(name);
+        return file.delete();
+    }
 }

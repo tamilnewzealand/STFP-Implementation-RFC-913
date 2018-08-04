@@ -188,7 +188,30 @@ class Server {
                         }
                         break;
                     case "KILL":
-                        responseMessage = "-";
+                        if (acc.isLoggedIn()) {
+                            if (acc.inAccount()) {
+                                try {
+                                    String path;
+                                    if (currentDir.equals("/")) {
+                                        path = Paths.get("host", acc.getAccount(), clientMessage).toString();
+                                    } else {
+                                        path = Paths.get("host", acc.getAccount(), currentDir, clientMessage).toString();
+                                    }
+                                    if (FileAccess.deleteFile(path)) {
+                                        responseMessage = "+" + clientMessage + " deleted";
+                                    } else {
+                                        responseMessage = "-Not deleted because file locked";
+                                    }
+                                } catch (IndexOutOfBoundsException e) {
+                                    responseMessage = "-Invalid command, try again";
+                                }
+                            } else {
+                                responseMessage = "-Invalid account, try again";
+                            }
+                        } else {
+                            responseMessage = "-Not logged in, please log in";
+                            failedAttempts++;
+                        }
                         break;
                     case "NAME":
                         responseMessage = "-";
