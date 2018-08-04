@@ -29,10 +29,10 @@ THE PROTOCOL
 
    SFTP is used by opening a TCP connection to the remote hosts' SFTP
    port (115 decimal).  You then send SFTP commands and wait for
-   replies.  SFTP commands sent to the remote server are always 4 ASCII
+   replies.  SFTP commands sent to the remote sftp913.server are always 4 ASCII
    letters (of any case) followed by a space, the argument(s), and a
    <NULL>.  The argument can sometimes be null in which case the command
-   is just 4 characters followed by <NULL>.  Replies from the server are
+   is just 4 characters followed by <NULL>.  Replies from the sftp913.server are
    always a response character followed immediately by an ASCII message
    string terminated by a <NULL>.  A reply can also be just a response
    character and a <NULL>.
@@ -48,7 +48,7 @@ THE PROTOCOL
 
       <message> can contain <CRLF>
 
-   Commands that can be sent to the server are listed below.  The server
+   Commands that can be sent to the sftp913.server are listed below.  The sftp913.server
 
 
 Lottor                                                          [Page 1]
@@ -58,7 +58,7 @@ Simple File Transfer Protocol
 
 
    replies to each command with one of the possible response codes
-   listed under each message.  Along with the response, the server
+   listed under each message.  Along with the response, the sftp913.server
    should optionally return a message explaining the error in more
    detail.  Example message texts are listed but do not have to be
    followed.  All characters used in messages are ASCII 7-bit with the
@@ -83,8 +83,8 @@ Simple File Transfer Protocol
          This is also used to mean you have sent enough information to
          connect to a directory.
 
-   To use SFTP you first open a connection to the remote SFTP server.
-   The server replies by sending either a positive or negative greeting,
+   To use SFTP you first open a connection to the remote SFTP sftp913.server.
+   The sftp913.server replies by sending either a positive or negative greeting,
    such as:
 
       +MIT-XX SFTP Service
@@ -100,7 +100,7 @@ RFC 913                                                   September 1984
 Simple File Transfer Protocol
 
 
-   If the server send back a '-' response it will also close the
+   If the sftp913.server send back a '-' response it will also close the
    connection, otherwise you must now send a USER command.
 
       USER user-id
@@ -316,8 +316,8 @@ Simple File Transfer Protocol
 
             +directory ok, send account/password
 
-         If the server replies with '+' you should then send an ACCT or
-         PASS command.  The server will wait for ACCT or PASS commands
+         If the sftp913.server replies with '+' you should then send an ACCT or
+         PASS command.  The sftp913.server will wait for ACCT or PASS commands
          until it returns a '-' or '!' response.
 
             Replies to ACCT could be:
@@ -370,7 +370,7 @@ Simple File Transfer Protocol
 
             TOBE new-file-spec
 
-         The server replies with:
+         The sftp913.server replies with:
 
             +<old-file-spec> renamed to <new-file-spec>
 
@@ -397,8 +397,8 @@ Simple File Transfer Protocol
 
          Requests that the remote system send the specified file.
 
-         Receiving a '-' from the server should abort the RETR command
-         and the server will wait for another command.
+         Receiving a '-' from the sftp913.server should abort the RETR command
+         and the sftp913.server will wait for another command.
 
          The reply from the remote system is:
 
@@ -438,7 +438,7 @@ Simple File Transfer Protocol
          it under that name.
 
          Receiving a '-' should abort the STOR command sequence and the
-         server should wait for the next command.
+         sftp913.server should wait for the next command.
 
          NEW specifies it should create a new generation of the file and
          not delete the existing one.
@@ -505,7 +505,7 @@ Simple File Transfer Protocol
 
             -Not enough room, don't send it
 
-               This aborts the STOR sequence, the server is waiting for
+               This aborts the STOR sequence, the sftp913.server is waiting for
                your next command.
 
          You are then ready to send another command to the remote host.
@@ -520,7 +520,7 @@ Simple File Transfer Protocol
 AN EXAMPLE
 
    An example file transfer.  'S' is the sender, the user process.  'R'
-   is the reply from the remote server.  Remember all server replies are
+   is the reply from the remote sftp913.server.  Remember all sftp913.server replies are
    terminated with <NULL>.  If the reply is more than one line each line
    ends with a <CRLF>.
 
