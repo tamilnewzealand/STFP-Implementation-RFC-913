@@ -2,6 +2,9 @@ package server;
 
 import java.io.*;
 import java.net.*;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+
 import server.*;
 
 class Server {
@@ -28,6 +31,7 @@ class Server {
             acc.loadAccounts();
             int failedAttempts = 0;
             String transferType = "B";
+            String currentDir = "/";
 
             while (active) {
                 clientMessage = inFromClient.readLine();
@@ -99,7 +103,28 @@ class Server {
                         }
                         break;
                     case "LIST":
-                        responseMessage = "-";
+                            if (acc.isLoggedIn()) {
+                                if (acc.inAccount()) {
+                                    String format;
+                                    try {
+                                        format = clientMessage.substring(0,1);
+                                    } catch (IndexOutOfBoundsException e) {
+                                        format = "F";
+                                    }
+                                    try {
+                                        responseMessage = "+" + clientMessage + "\r\n";
+                                        responseMessage = responseMessage + FileAccess.getFileList(Paths.get("host", acc.getAccount(), clientMessage.substring(2)).toString(), format);
+                                    } catch (IndexOutOfBoundsException e) {
+                                        responseMessage = "+" + currentDir + "\r\n";
+                                        responseMessage = responseMessage + FileAccess.getFileList(Paths.get("host", acc.getAccount(), currentDir).toString(), format);
+                                    }
+                                } else {
+                                    responseMessage = "-Invalid account, try again";
+                                }
+                            } else {
+                                responseMessage = "-Not logged in, please log in";
+                                failedAttempts++;
+                            }
                         break;
                     case "CDIR":
                         responseMessage = "-";

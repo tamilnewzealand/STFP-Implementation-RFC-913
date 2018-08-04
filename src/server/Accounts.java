@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 public class Accounts {
-    private ArrayList<String[]> data = new ArrayList<>();
+    private ArrayList<String[]> data = new ArrayList<String[]>();
     private String userID = "";
     private String userAccount = "";
     private String userPassword = "";
@@ -68,6 +68,10 @@ public class Accounts {
             return false;
         }
         return true;
+    }
+
+    public String getAccount() {
+        return userAccount;
     }
 
     public void loadAccounts() throws IOException {
