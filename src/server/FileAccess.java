@@ -35,4 +35,9 @@ public class FileAccess {
 
         return fileList;
     }
+
+    public static boolean checkDirectoryExists(String dir) {
+        File folder = new File(dir);
+        return folder.exists();
+    }
 }

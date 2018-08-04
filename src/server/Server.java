@@ -2,10 +2,13 @@ package server;
 
 import java.io.*;
 import java.net.*;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 
 import server.*;
+
+import javax.swing.*;
 
 class Server {
 
@@ -45,6 +48,7 @@ class Server {
             int failedAttempts = 0;
             String transferType = "B";
             String currentDir = "/";
+            ArrayList<String> dirStructure = new ArrayList<String>();
 
             while (active) {
                 clientMessage = getResponse(inFromClient);
@@ -141,7 +145,47 @@ class Server {
                             }
                         break;
                     case "CDIR":
-                        responseMessage = "-";
+                        if (acc.isLoggedIn()) {
+                            if (acc.inAccount()) {
+                                try {
+                                    String newDir;
+                                    if (currentDir.equals("/")) {
+                                        newDir = clientMessage;
+                                    } else {
+                                        newDir = Paths.get(currentDir, clientMessage).toString();
+                                    }
+                                    if (clientMessage.equals(".")) {
+                                        newDir = currentDir;
+                                    }
+                                    if (clientMessage.equals("..")) {
+                                        if (dirStructure.size() != 0) {
+                                            newDir = "";
+                                            for (int i = 0; i < dirStructure.size() - 1; i++) {
+                                                newDir = Paths.get(newDir, dirStructure.get(i)).toString();
+                                            }
+                                        }
+                                    }
+                                    if (FileAccess.checkDirectoryExists(Paths.get("host", acc.getAccount(), newDir).toString())) {
+                                        if (clientMessage.equals("..")) {
+                                            dirStructure.remove(dirStructure.size()-1);
+                                        } else {
+                                            dirStructure.add(clientMessage);
+                                        }
+                                        currentDir = newDir; // FIX: need to consider all the path options supplied and how to work with them
+                                        responseMessage = "!Changed working dir to " + clientMessage;
+                                    } else {
+                                        responseMessage = "-Can't connect to directory because: directory doesn't exist";
+                                    }
+                                } catch (Exception e) {
+                                    responseMessage = "-Invalid command, try again";
+                                }
+                            } else {
+                                responseMessage = "-Invalid account, try again";
+                            }
+                        } else {
+                            responseMessage = "-Not logged in, please log in";
+                            failedAttempts++;
+                        }
                         break;
                     case "KILL":
                         responseMessage = "-";
