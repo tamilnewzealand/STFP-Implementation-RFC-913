@@ -45,4 +45,18 @@ public class FileAccess {
         File file = new File(name);
         return file.delete();
     }
+
+    public static boolean renameFile(String oldName, String newName) {
+        File destination = new File(newName);
+        if (destination.exists()) {
+            return false;
+        } else {
+            File source = new File(oldName);
+            if (source.renameTo(destination)) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }
 }

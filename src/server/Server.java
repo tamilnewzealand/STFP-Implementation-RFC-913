@@ -48,6 +48,7 @@ class Server {
             int failedAttempts = 0;
             String transferType = "B";
             String currentDir = "/";
+            String fileToRename = "";
             ArrayList<String> dirStructure = new ArrayList<String>();
 
             while (active) {
@@ -214,7 +215,53 @@ class Server {
                         }
                         break;
                     case "NAME":
-                        responseMessage = "-";
+                        if (acc.isLoggedIn()) {
+                            if (acc.inAccount()) {
+                                try {
+                                    String path;
+                                    if (currentDir.equals("/")) {
+                                        path = Paths.get("host", acc.getAccount(), clientMessage).toString();
+                                    } else {
+                                        path = Paths.get("host", acc.getAccount(), currentDir, clientMessage).toString();
+                                    }
+                                    if (FileAccess.checkDirectoryExists(path)) {
+                                            responseMessage = "+File exists";
+                                            fileToRename = path;
+                                    } else {
+                                        responseMessage = "-Can't find file";
+                                    }
+                                } catch (IndexOutOfBoundsException e) {
+                                    responseMessage = "-Invalid command, try again";
+                                }
+                            } else {
+                                responseMessage = "-Invalid account, try again";
+                            }
+                        } else {
+                            responseMessage = "-Not logged in, please log in";
+                            failedAttempts++;
+                        }
+                        break;
+                    case "TOBE":
+                        if (fileToRename.equals("")) {
+                            responseMessage = "-Invalid command, try again";
+                        } else {
+                            try {
+                                String path;
+                                if (currentDir.equals("/")) {
+                                    path = Paths.get("host", acc.getAccount(), clientMessage).toString();
+                                } else {
+                                    path = Paths.get("host", acc.getAccount(), currentDir, clientMessage).toString();
+                                }
+                                if (FileAccess.renameFile(fileToRename, path)) {
+                                    responseMessage = "+" + fileToRename + " renamed to " + path;
+                                    fileToRename = "";
+                                } else {
+                                    responseMessage = "-File wasn't renamed, access denied";
+                                }
+                            } catch (IndexOutOfBoundsException e) {
+                                responseMessage = "-Invalid command, try again";
+                            }
+                        }
                         break;
                     case "DONE":
                         responseMessage = "+" + serverName + " closing connection";
