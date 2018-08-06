@@ -2,7 +2,6 @@ package server;
 
 import java.io.*;
 import java.net.*;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 
@@ -49,7 +48,9 @@ class Server {
             String transferType = "B";
             String currentDir = "/";
             String fileToRename = "";
+            String fileToRetrieve = "";
             ArrayList<String> dirStructure = new ArrayList<String>();
+            boolean sendOutput = true;
 
             while (active) {
                 clientMessage = getResponse(inFromClient);
@@ -268,7 +269,45 @@ class Server {
                         active = false;
                         break;
                     case "RETR":
-                        responseMessage = "-";
+                        if (acc.isLoggedIn()) {
+                            if (acc.inAccount()) {
+                                try {
+                                    String path;
+                                    if (currentDir.equals("/")) {
+                                        path = Paths.get("host", acc.getAccount(), clientMessage).toString();
+                                    } else {
+                                        path = Paths.get("host", acc.getAccount(), currentDir, clientMessage).toString();
+                                    }
+                                    try {
+                                        long size = FileAccess.getFileSize(path);
+                                        fileToRetrieve = path;
+                                        responseMessage = String.valueOf(size);
+                                    } catch (Exception e) {
+                                        responseMessage = "-File doesn't exist";
+                                    }
+                                } catch (IndexOutOfBoundsException e) {
+                                    responseMessage = "-Invalid command, try again";
+                                }
+                            } else {
+                                responseMessage = "-Invalid account, try again";
+                            }
+                        } else {
+                            responseMessage = "-Not logged in, please log in";
+                            failedAttempts++;
+                        }
+                        break;
+                    case "SEND":
+                        if (fileToRetrieve.equals("")) {
+                            responseMessage = "-Invalid command, try again";
+                        } else {
+                            responseMessage = "";
+                            FileAccess.sendFile(fileToRetrieve, outToClient, transferType);
+                            sendOutput = false;
+                        }
+                        break;
+                    case "STOP":
+                        responseMessage = "+ok, RETR aborted";
+                        fileToRetrieve = "";
                         break;
                     case "STOR":
                         responseMessage = "-";
@@ -286,9 +325,14 @@ class Server {
                     responseMessage = "-Unknown Server Error";
                 }
 
-                responseMessage = responseMessage + "\0";
-                outToClient.write(responseMessage);
-                outToClient.flush();
+                if (sendOutput) {
+                    responseMessage = responseMessage + "\0";
+                    outToClient.write(responseMessage);
+                    outToClient.flush();
+                } else {
+                    sendOutput = true;
+                }
+
             }
 
             connectionSocket.close();

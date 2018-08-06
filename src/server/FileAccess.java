@@ -59,4 +59,44 @@ public class FileAccess {
             }
         }
     }
+
+    public static long getFileSize(String name) {
+        File file = new File(name);
+        return file.length();
+    }
+
+    public static void sendFile(String fileName, BufferedWriter outToClient, String transferType) {
+        File file = new File(fileName);
+        if (transferType.equals("A")) {
+            try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+                String line;
+                while ((line = br.readLine()) != null) {
+                    outToClient.write(line + "\r\n");
+                    outToClient.flush();
+                }
+                outToClient.write("\0");
+                outToClient.flush();
+            } catch (Exception e) {
+                return;
+            }
+        } else {
+            try (InputStream is = new FileInputStream(file)) {
+                int temp;
+                int count = 0;
+                while ((temp = is.read()) !=  -1) {
+                    outToClient.write(temp);
+                    count++;
+                    if (count > 1024) {
+                        outToClient.flush();
+                        count = 0;
+                    }
+                }
+                outToClient.write("\0");
+                outToClient.flush();
+            } catch (Exception e) {
+                return;
+            }
+            return;
+        }
+    }
 }
